@@ -1,0 +1,17 @@
+{
+    "name": "yiiatom/pages",
+    "description": "Hierarchical static pages management module for Atom CMS",
+    "type": "yii3-extension",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.2",
+        "yiiatom/cms": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Atom\\Pages\\": "src/"
+        }
+    }
+}
