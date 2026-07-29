@@ -19,6 +19,7 @@ final class M260724072257Page implements RevertibleMigrationInterface, Transacti
             'title' => ColumnBuilder::string(255)->notNull(),
             'slug' => ColumnBuilder::string(255)->notNull(),
             'path' => ColumnBuilder::string(1024)->notNull(),
+            'depth' => ColumnBuilder::integer()->notNull()->defaultValue(0),
             'parent_uuid' => ColumnBuilder::string(36),
             'position' => ColumnBuilder::integer()->notNull()->defaultValue(0),
             'content' => ColumnBuilder::text()->notNull(),
