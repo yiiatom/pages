@@ -18,4 +18,13 @@ enum PageStatus: string
             self::DELETED => 'Deleted',
         };
     }
+
+    public function getCssClass(): string
+    {
+        return match ($this) {
+            self::DRAFT => 'bg-warning text-dark',
+            self::PUBLISHED => 'bg-success text-white',
+            self::DELETED => 'bg-danger text-white',
+        };
+    }
 }
