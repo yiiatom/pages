@@ -13,6 +13,7 @@
     },
     "extra": {
         "config-plugin": {
+            "params": "config/params.php",
             "events": "config/events.php",
             "routes": "config/routes.php"
         }
