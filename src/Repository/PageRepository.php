@@ -42,7 +42,12 @@ final readonly class PageRepository
 
     private function update(Page $entity, Page $old): void
     {
-        $this->connection->transaction(function () use ($entity): void {
+        $this->connection->transaction(function () use ($entity, $old): void {
+            if ($entity->getParentUuid() !== $old->getParentUuid()) {
+                $position = $this->getNextPosition($entity->getParentUuid());
+                $entity->setPosition($position);
+            }
+
             $row = $this->mapper->mapEntityToRow($entity);
             $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $entity->getUuid()])->execute();
 
