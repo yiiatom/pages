@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atom\Pages\Entity;
 
 use DateTimeImmutable;
+use Ramsey\Uuid\Uuid;
 
 final class Page
 {
@@ -22,6 +23,32 @@ final class Page
         private DateTimeImmutable $updatedAt,
         private ?DateTimeImmutable $deletedAt,
     ) {}
+
+    public static function create(
+        string $title = '',
+        string $slug = '',
+        int $position = 0,
+        string $content = '',
+        PageStatus $status = PageStatus::DRAFT,
+        ?Page $parent = null,
+    ): self {
+        $date = new DateTimeImmutable;
+        $parentPath = $parent ? $parent->getPath() : '';
+        return new self(
+            uuid: Uuid::uuid7()->toString(),
+            title: $title,
+            slug: $slug,
+            path: $parentPath . '/' . $slug,
+            depth: $parent ? $parent->getDepth() + 1 : 0,
+            parentUuid: $parent ? $parent->getUuid() : null,
+            position: $position,
+            content: $content,
+            status: $status,
+            createdAt: $createdAt ?? $date,
+            updatedAt: $updatedAt ?? $date,
+            deletedAt: null,
+        );
+    }
 
     public function getUuid(): string
     {
@@ -51,6 +78,14 @@ final class Page
     public function getParentUuid(): ?string
     {
         return $this->parentUuid;
+    }
+
+    public function setPosition(int $value): self
+    {
+        $this->position = $value;
+        $this->updatedAt = new DateTimeImmutable;
+
+        return $this;
     }
 
     public function getStatus(): PageStatus
