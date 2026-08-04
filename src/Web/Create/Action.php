@@ -60,7 +60,6 @@ final readonly class Action
             $page = Page::create(
                 title: $form->title,
                 slug: $form->slug,
-                position: $this->pageRepository->getNextPosition($form->parentUuid),
                 content: $form->content,
                 status: PageStatus::from($form->status),
                 parent: $parent,

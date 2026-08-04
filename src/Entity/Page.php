@@ -27,7 +27,6 @@ final class Page
     public static function create(
         string $title = '',
         string $slug = '',
-        int $position = 0,
         string $content = '',
         PageStatus $status = PageStatus::DRAFT,
         ?Page $parent = null,
@@ -41,7 +40,7 @@ final class Page
             path: $parentPath . '/' . $slug,
             depth: $parent ? $parent->getDepth() + 1 : 0,
             parentUuid: $parent ? $parent->getUuid() : null,
-            position: $position,
+            position: 0,
             content: $content,
             status: $status,
             createdAt: $createdAt ?? $date,

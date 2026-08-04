@@ -31,8 +31,13 @@ final readonly class PageRepository
 
     private function insert(Page $entity): void
     {
-        $row = $this->mapper->mapEntityToRow($entity);
-        $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
+        $this->connection->transaction(function () use ($entity): void {
+            $position = $this->getNextPosition($entity->getParentUuid());
+            $entity->setPosition($position);
+
+            $row = $this->mapper->mapEntityToRow($entity);
+            $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
+        });
     }
 
     private function update(Page $entity, Page $old): void
@@ -139,7 +144,7 @@ final readonly class PageRepository
         return new PageDataReader($reader, $this->mapper);
     }
 
-    public function getNextPosition(?string $parentUuid): int
+    private function getNextPosition(?string $parentUuid): int
     {
         if ($parentUuid === '') {
             $parentUuid = null;
