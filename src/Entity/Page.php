@@ -77,6 +77,13 @@ final class Page
         $this->updatedAt = new DateTimeImmutable;
     }
 
+    public function delete(): void
+    {
+        $this->status = PageStatus::DELETED;
+        $this->deletedAt = new DateTimeImmutable;
+        $this->updatedAt = new DateTimeImmutable;
+    }
+
     public function getUuid(): string
     {
         return $this->uuid;
@@ -128,5 +135,10 @@ final class Page
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
     }
 }

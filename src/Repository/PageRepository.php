@@ -51,6 +51,16 @@ final readonly class PageRepository
             $row = $this->mapper->mapEntityToRow($entity);
             $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $entity->getUuid()])->execute();
 
+            if ($entity->getStatus() === PageStatus::DELETED && $old->getStatus() !== PageStatus::DELETED) {
+                $this->connection->createCommand()
+                    ->update('{{%page}}', [
+                        'status' => PageStatus::DELETED->value,
+                        'deleted_at' => $entity->getDeletedAt(),
+                    ], 'path LIKE :path', null, [
+                        ':path' => $old->getPath() . '/%',
+                    ])->execute();
+            }
+
             if ($entity->getPath() !== $old->getPath()) {
                 $this->connection->createCommand(
                     'UPDATE {{%page}}
