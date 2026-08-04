@@ -37,8 +37,8 @@ final class M260724072257Page implements RevertibleMigrationInterface, Transacti
             'parent_uuid', 
             self::PAGE_TABLE, 
             'uuid', 
-            'RESTRICT', 
-            'CASCADE'
+            'CASCADE',
+            'CASCADE',
         );
 
         $b->execute('CREATE INDEX `path` ON ' . self::PAGE_TABLE . ' (`path`(255))');
