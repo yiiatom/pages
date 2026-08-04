@@ -50,6 +50,34 @@ final class Page
         );
     }
 
+    public function update(
+        string $title = '',
+        string $slug = '',
+        string $content = '',
+        PageStatus $status = PageStatus::DRAFT,
+        ?Page $parent = null,
+    ): void
+    {
+        $this->title = $title;
+        $this->content = $content;
+        $this->status = $status;
+
+        if ($this->slug !== $slug || $this->parentUuid !== $parent?->getUuid()) {
+            $this->slug = $slug;
+            $this->parentUuid = $parent?->getUuid();
+
+            if ($parent === null) {
+                $this->depth = 0;
+                $this->path = '/' . $slug;
+            } else {
+                $this->depth = $parent->getDepth() + 1;
+                $this->path = $parent->getPath() . '/' . $slug;
+            }
+        }
+
+        $this->updatedAt = new DateTimeImmutable;
+    }
+
     public function getUuid(): string
     {
         return $this->uuid;
@@ -88,8 +116,18 @@ final class Page
         return $this;
     }
 
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
     public function getStatus(): PageStatus
     {
         return $this->status;
+    }
+
+    public function getUpdatedAt(): DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 }

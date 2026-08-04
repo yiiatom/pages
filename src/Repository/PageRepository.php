@@ -20,14 +20,41 @@ final readonly class PageRepository
 
     public function save(Page $entity): void
     {
-        $row = $this->mapper->mapEntityToRow($entity);
-        $uuid = $entity->getUuid();
+        $old = $this->findOneByUuid($entity->getUuid());
 
-        if ($this->exists($uuid)) {
-            $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $uuid])->execute();
+        if ($old !== null) {
+            $this->update($entity, $old);
         } else {
-            $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
+            $this->insert($entity);
         }
+    }
+
+    private function insert(Page $entity): void
+    {
+        $row = $this->mapper->mapEntityToRow($entity);
+        $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
+    }
+
+    private function update(Page $entity, Page $old): void
+    {
+        $this->connection->transaction(function () use ($entity): void {
+            $row = $this->mapper->mapEntityToRow($entity);
+            $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $entity->getUuid()])->execute();
+
+            if ($entity->getPath() !== $old->getPath()) {
+                $this->connection->createCommand(
+                    'UPDATE {{%page}}
+                    SET path = REPLACE(path, :oldPath, :newPath),
+                        depth = depth + :depthDiff
+                    WHERE path LIKE :likePath',
+                )->bindValues([
+                    ':oldPath' => $old->getPath(),
+                    ':newPath' => $entity->getPath(),
+                    ':depthDiff' => $entity->getDepth() - $old->getDepth(),
+                    ':likePath' => $old->getPath() . '/%',
+                ])->execute();
+            }
+        });
     }
 
     private function createEntity(?array $row): ?Page
@@ -53,9 +80,15 @@ final readonly class PageRepository
         ?string $excludeUuid = null,
     ): bool
     {
+        if ($parentUuid === '') {
+            $parentUuid = null;
+        }
+
         $query = $this->connection->createQuery()
             ->from('{{%page}}')
             ->where(['slug' => $slug, 'parent_uuid' => $parentUuid]);
+
+        $query->andWhere(['!=', 'status', PageStatus::DELETED->value]);
 
         if ($excludeUuid) {
             $query->andWhere(['!=', 'uuid', $excludeUuid]);
@@ -108,6 +141,10 @@ final readonly class PageRepository
 
     public function getNextPosition(?string $parentUuid): int
     {
+        if ($parentUuid === '') {
+            $parentUuid = null;
+        }
+
         $query = $this->connection
             ->select(['MAX(position) as position'])
             ->from('{{%page}}')
