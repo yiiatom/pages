@@ -36,15 +36,15 @@ final readonly class Action
             ->add('Pages', 'atom.page.index')
             ->add('Create Page');
 
-        $form = new PageCreateForm();
-        $uuid = $request->getQueryParams()['uuid'] ?? null;
+        $parents = $this->pageRepository->getTreeAsDataReader()->read();
 
+        $form = (new PageCreateForm())
+            ->withParents($parents);
+
+        $uuid = $request->getQueryParams()['uuid'] ?? null;
         if ($uuid) {
             $form->parentUuid = $uuid;
         }
-
-        $parents = $this->pageRepository->getTreeAsDataReader()->read();
-        $form = $form->withParents($parents);
 
         $this->formHydrator->populateFromPostAndValidate($form, $request);
 
