@@ -2,3 +2,7 @@
     min-height: 200px;
     background: #fff;
 }
+
+.sortable-tree .sort-handle {
+    cursor: grab;
+}

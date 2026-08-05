@@ -174,4 +174,15 @@ final readonly class PageRepository
 
         return $max + 1;
     }
+
+    public function updatePositions(array $positions): void
+    {
+        $this->connection->transaction(function () use ($positions): void {
+            foreach ($positions as $uuid => $position) {
+                $this->connection->createCommand()
+                    ->update('{{%page}}', ['position' => $position], ['uuid' => $uuid])
+                    ->execute();
+            }
+        });
+    }
 }

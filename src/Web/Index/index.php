@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Atom\Pages\Entity\Page;
+use Atom\Pages\Web\Shared\PagesAsset;
 use Yiisoft\Html\Html;
 use Yiisoft\Yii\DataView\GridView\Column\ActionButton;
 use Yiisoft\Yii\DataView\GridView\Column\ActionColumn;
@@ -13,6 +14,8 @@ $title = 'Pages';
 
 $this->setTitle($title);
 
+$assetManager->register(PagesAsset::class);
+
 ?>
 <h1><?= Html::encode($title) ?></h1>
 
@@ -20,7 +23,24 @@ $this->setTitle($title);
 
 <?= GridView::widget()
     ->dataReader($dataReader)
+    ->tbodyAttributes(['data-sort-url' => $urlGenerator->generate('atom.page.sort')])
+    ->addTbodyClass('sortable-tree')
+    ->bodyRowAttributes(static function (Page $page): array {
+        return [
+            'data-uuid' => $page->getUuid(),
+            'data-depth' => $page->getDepth(),
+        ];
+    })
     ->columns(
+        new DataColumn(
+            bodyAttributes: ['style' => 'width: 40px'],
+            content: static function (Page $page): string {
+                return Html::i()
+                    ->class('fa-solid fa-grip-vertical opacity-50 sort-handle')
+                    ->render();
+            },
+            encodeContent: false,
+        ),
         new DataColumn(
             property: 'title',
             header: 'Title',

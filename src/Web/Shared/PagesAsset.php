@@ -19,6 +19,7 @@ final class PagesAsset extends AssetBundle
 
     public array $js = [
         'quill/dist/quill.js',
+        'sortable/sortable.min.js',
         'pages.js',
     ];
 }

@@ -32,5 +32,9 @@ return [
             Route::post('/pages/{uuid}/delete')
                 ->action(Atom\Pages\Web\Delete\Action::class)
                 ->name('atom.page.delete'),
+
+            Route::post('/pages/sort')
+                ->action(Atom\Pages\Web\Sort\Action::class)
+                ->name('atom.page.sort'),
         ),
 ];
