@@ -137,7 +137,7 @@ final readonly class PageRepository
         return $this->createEntity($query->one());
     }
 
-    public function getTreeAsDataReader(array $filters = []): ReadableDataInterface
+    public function findTreeAsDataReader(array $filters = []): ReadableDataInterface
     {
         $rows = $this->connection
             ->select()
@@ -170,13 +170,16 @@ final readonly class PageRepository
         return new ReadableDataProxy($dataReader);
     }
 
-    public function getDeletedAsDataReader(): DataReaderInterface
+    public function findAllDeletedAsDataReader(): DataReaderInterface
     {
         $query = $this->connection
             ->select()
             ->from('{{%page}}')
             ->where(['not', ['deleted_at' => null]])
-            ->orderBy(['deleted_at' => SORT_DESC]);
+            ->orderBy([
+                'deleted_at' => SORT_DESC,
+                '_path' => SORT_ASC,
+            ]);
 
         return new PageDataReader(new QueryDataReader($query), $this->mapper);
     }

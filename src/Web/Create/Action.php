@@ -36,7 +36,7 @@ final readonly class Action
             ->add('Pages', 'atom.page.index')
             ->add('Create Page');
 
-        $parents = $this->pageRepository->getTreeAsDataReader()->read();
+        $parents = $this->pageRepository->findTreeAsDataReader()->read();
 
         $form = (new PageCreateForm())
             ->withParents($parents);

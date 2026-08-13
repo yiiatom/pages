@@ -25,7 +25,7 @@ final class Action
             ->add('Pages', 'atom.page.index')
             ->add('Trash');
 
-        $dataReader = $this->pageRepository->getDeletedAsDataReader();
+        $dataReader = $this->pageRepository->findAllDeletedAsDataReader();
 
         return $request
             ->getAttribute(WebViewRenderer::class)

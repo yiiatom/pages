@@ -23,7 +23,7 @@ final class Action
     {
         $this->breadcrumbsProvider->add('Pages');
 
-        $dataReader = $this->pageRepository->getTreeAsDataReader();
+        $dataReader = $this->pageRepository->findTreeAsDataReader();
 
         return $request
             ->getAttribute(WebViewRenderer::class)

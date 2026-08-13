@@ -44,7 +44,7 @@ final readonly class Action
             ->add('Pages', 'atom.page.index')
             ->add($page->getTitle());
 
-        $parents = $this->pageRepository->getTreeAsDataReader()->read();
+        $parents = $this->pageRepository->findTreeAsDataReader()->read();
 
         $form = (new PageEditForm())
             ->withPath($page->getPath())
