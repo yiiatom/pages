@@ -188,7 +188,9 @@ final readonly class PageRepository
                 '_path' => SORT_ASC,
             ]);
 
-        return new PageDataReader(new QueryDataReader($query), $this->mapper);
+        $reader = new QueryDataReader($query);
+
+        return new PageDataReader($reader, $this->mapper);
     }
 
     public function findAllParents(Page $entity): array
