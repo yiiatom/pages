@@ -3,21 +3,15 @@
 declare(strict_types=1);
 
 use Atom\Pages\Entity\Page;
-use Atom\Pages\Web\Shared\PagesAsset;
 use Yiisoft\Html\Html;
 use Yiisoft\Yii\DataView\GridView\Column\ActionButton;
 use Yiisoft\Yii\DataView\GridView\GridView;
 use Yiisoft\Yii\DataView\GridView\Column\ActionColumn;
 use Yiisoft\Yii\DataView\GridView\Column\DataColumn;
 
-use Yiisoft\Yii\DataView\Pagination\PaginationContext;
-use Atom\Helper\DataViewUrlBridge;
-
 $title = 'Trash';
 
 $this->setTitle($title);
-
-$assetManager->register(PagesAsset::class);
 
 ?>
 <h1><?= Html::encode($title) ?></h1>
