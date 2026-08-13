@@ -9,9 +9,11 @@ use Ramsey\Uuid\Uuid;
 
 final class Page
 {
-    const PATH_SEPARATOR = '/';
-    const LOCATION_SEPARATOR = "\u{2023}";
-    const DEFAULT_SEPARATOR = '/';
+    const INTERNAL_PATH_SEPARATOR = "\x1F";
+    const DEFAULT_PATH_SEPARATOR = '/';
+
+    const INTERNAL_LOCATION_SEPARATOR = "\x1F";
+    const DEFAULT_LOCATION_SEPARATOR = ' » ';
 
     public function __construct(
         private string $uuid,
@@ -43,11 +45,11 @@ final class Page
             uuid: Uuid::uuid7()->toString(),
             title: $title,
             slug: $slug,
-            _path: $parentPath . self::PATH_SEPARATOR . $slug,
+            _path: $parentPath . self::INTERNAL_PATH_SEPARATOR . $slug,
             depth: $parent ? $parent->getDepth() + 1 : 0,
             parentUuid: $parent ? $parent->getUuid() : null,
             position: 0,
-            _location: $parentLocation . self::LOCATION_SEPARATOR . $title,
+            _location: $parentLocation . self::INTERNAL_LOCATION_SEPARATOR . $title,
             content: $content,
             status: $status,
             createdAt: $createdAt ?? $date,
@@ -71,19 +73,19 @@ final class Page
             $this->slug = $slug;
             if ($parent === null) {
                 $this->depth = 0;
-                $this->_path = self::PATH_SEPARATOR . $slug;
+                $this->_path = self::INTERNAL_PATH_SEPARATOR . $slug;
             } else {
                 $this->depth = $parent->getDepth() + 1;
-                $this->_path = $parent->_path . self::PATH_SEPARATOR . $slug;
+                $this->_path = $parent->_path . self::INTERNAL_PATH_SEPARATOR . $slug;
             }
         }
 
         if ($this->title !== $title || $parentChanged) {
             $this->title = $title;
             if ($parent === null) {
-                $this->_location = self::LOCATION_SEPARATOR . $title;
+                $this->_location = self::INTERNAL_LOCATION_SEPARATOR . $title;
             } else {
-                $this->_location = $parent->_location . self::LOCATION_SEPARATOR . $title;
+                $this->_location = $parent->_location . self::INTERNAL_LOCATION_SEPARATOR . $title;
             }
         }
 
@@ -125,9 +127,9 @@ final class Page
         return $this->slug;
     }
 
-    public function getPath(string $separator = self::DEFAULT_SEPARATOR): string
+    public function getPath(string $separator = self::DEFAULT_PATH_SEPARATOR): string
     {
-        return str_replace(self::PATH_SEPARATOR, $separator, $this->_path);
+        return str_replace(self::INTERNAL_PATH_SEPARATOR, $separator, $this->_path);
     }
 
     public function getDepth(): int
@@ -148,9 +150,9 @@ final class Page
         return $this;
     }
 
-    public function getParentLocation(string $separator = self::DEFAULT_SEPARATOR): string
+    public function getParentLocation(string $separator = self::DEFAULT_LOCATION_SEPARATOR): string
     {
-        $parts = explode(self::LOCATION_SEPARATOR, $this->_location);
+        $parts = explode(self::INTERNAL_LOCATION_SEPARATOR, $this->_location);
         array_shift($parts);
         array_pop($parts);
 

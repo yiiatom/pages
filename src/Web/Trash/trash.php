@@ -33,7 +33,7 @@ $assetManager->register(PagesAsset::class);
         new DataColumn(
             property: 'titlePath',
             header: 'Original Location',
-            content: static fn (Page $page): string => $page->getParentLocation(' » '),
+            content: static fn (Page $page): string => $page->getParentLocation(),
         ),
         new DataColumn(
             property: 'deletedAt',

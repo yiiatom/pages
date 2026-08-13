@@ -65,7 +65,7 @@ final readonly class PageRepository
                 ->update('{{%page}}', [
                     'deleted_at' => $row['deleted_at'],
                 ], '_path LIKE :path', null, [
-                    ':path' => $oldRow['_path'] . Page::PATH_SEPARATOR . '%',
+                    ':path' => $oldRow['_path'] . Page::INTERNAL_PATH_SEPARATOR . '%',
                 ])->execute();
         }
 
@@ -77,12 +77,12 @@ final readonly class PageRepository
                     [[_location]] = REPLACE([[_location]], :oldLocation, :newLocation)
                 WHERE _path LIKE :likePath',
             )->bindValues([
-                ':oldPath' => $oldRow['_path'] . Page::PATH_SEPARATOR,
-                ':newPath' => $row['_path'] . Page::PATH_SEPARATOR,
+                ':oldPath' => $oldRow['_path'] . Page::INTERNAL_PATH_SEPARATOR,
+                ':newPath' => $row['_path'] . Page::INTERNAL_PATH_SEPARATOR,
                 ':depthDiff' => $row['depth'] - $oldRow['depth'],
-                ':oldLocation' => $oldRow['_location'] . Page::LOCATION_SEPARATOR,
-                ':newLocation' => $row['_location'] . Page::LOCATION_SEPARATOR,
-                ':likePath' => $oldRow['_path'] . Page::PATH_SEPARATOR . '%',
+                ':oldLocation' => $oldRow['_location'] . Page::INTERNAL_LOCATION_SEPARATOR,
+                ':newLocation' => $row['_location'] . Page::INTERNAL_LOCATION_SEPARATOR,
+                ':likePath' => $oldRow['_path'] . Page::INTERNAL_PATH_SEPARATOR . '%',
             ])->execute();
         }
     }
@@ -188,14 +188,14 @@ final readonly class PageRepository
     {
         $row = $this->mapper->mapEntityToRow($entity);
 
-        $parts = explode(Page::PATH_SEPARATOR, $row['_path']);
+        $parts = explode(Page::INTERNAL_PATH_SEPARATOR, $row['_path']);
         array_shift($parts);
         array_pop($parts);
 
         $paths = [];
         $path = '';
         foreach ($parts as $part) {
-            $path .= Page::PATH_SEPARATOR . $part;
+            $path .= Page::INTERNAL_PATH_SEPARATOR . $part;
             $paths[] = $path;
         }
 
