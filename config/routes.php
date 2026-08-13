@@ -44,5 +44,9 @@ return [
             Route::post('/pages/{uuid}/restore')
                 ->action(Atom\Pages\Web\Restore\Action::class)
                 ->name('atom.page.restore'),
+
+            Route::post('/pages/empty-trash')
+                ->action(Atom\Pages\Web\EmptyTrash\Action::class)
+                ->name('atom.page.empty-trash'),
         ),
 ];

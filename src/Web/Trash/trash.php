@@ -22,6 +22,20 @@ $assetManager->register(PagesAsset::class);
 ?>
 <h1><?= Html::encode($title) ?></h1>
 
+<?php if ($dataReader->count() > 0): ?>
+    <div class="mb-2">
+        <?= Html::a(Html::i()->class('fa-solid fa-trash-can me-2')->render() . 'Empty Trash')
+            ->url($urlGenerator->generate('atom.page.empty-trash'))
+            ->class('btn btn-danger')
+            ->addAttributes([
+                'data-method' => 'POST',
+                'data-confirm' => 'Are you sure you want to permanently delete all items in the trash? This action cannot be undone.',
+            ])
+            ->encode(false)
+        ?>
+    </div>
+<?php endif; ?>
+
 <?= GridView::widget()
     ->dataReader($dataReader)
     ->columns(

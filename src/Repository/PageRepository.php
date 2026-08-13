@@ -87,6 +87,13 @@ final readonly class PageRepository
         }
     }
 
+    public function purgeDeleted(): int
+    {
+        return $this->connection->createCommand()
+            ->delete('{{%page}}', ['not', ['deleted_at' => null]])
+            ->execute();
+    }
+
     private function createEntity(?array $row): ?Page
     {
         if ($row === null) {
