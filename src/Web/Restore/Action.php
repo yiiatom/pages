@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Atom\Pages\Web\Delete;
+namespace Atom\Pages\Web\Restore;
 
 use Atom\Pages\Repository\PageRepository;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -29,16 +29,23 @@ final readonly class Action
     {
         $page = $this->pageRepository->findOneByUuid($uuid);
 
-        if (!$page || $page->isDeleted()) {
+        if (!$page || !$page->isDeleted()) {
             return $this->responseFactory
                 ->createResponse(Status::NOT_FOUND);
         }
 
-        $page->delete();
+        $items = $this->pageRepository->findAllParents($page);
+        array_push($items, $page);
 
-        $this->pageRepository->save($page);
+        foreach ($items as $item) {
+            if ($item->isDeleted()) {
+                $item->restore();
+            }
+        }
 
-        $this->flash->add('success', 'Page has been deleted.');
+        $this->pageRepository->save($items);
+
+        $this->flash->add('success', 'Page has been restored.');
 
         return $this->responseFactory
             ->createResponse(Status::SEE_OTHER)

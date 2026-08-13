@@ -19,7 +19,17 @@ $assetManager->register(PagesAsset::class);
 ?>
 <h1><?= Html::encode($title) ?></h1>
 
-<div class="mb-2"><?= Html::a('Create Page')->url($urlGenerator->generate('atom.page.create'))->class('btn btn-primary') ?></div>
+<div class="mb-2 d-flex justify-content-between align-items-center">
+    <?= Html::a('Create Page')
+        ->url($urlGenerator->generate('atom.page.create'))
+        ->class('btn btn-primary me-2')
+    ?>
+    <?= Html::a(Html::i()->class('fa-solid fa-trash-can me-2')->render() . 'Trash')
+        ->url($urlGenerator->generate('atom.page.trash'))
+        ->class('btn btn-outline-secondary')
+        ->encode(false)
+    ?>
+</div>
 
 <?= GridView::widget()
     ->dataReader($dataReader)

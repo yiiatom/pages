@@ -9,14 +9,19 @@ use Ramsey\Uuid\Uuid;
 
 final class Page
 {
+    const PATH_SEPARATOR = '/';
+    const LOCATION_SEPARATOR = "\u{2023}";
+    const DEFAULT_SEPARATOR = '/';
+
     public function __construct(
         private string $uuid,
         private string $title,
         private string $slug,
-        private string $path,
+        private string $_path,
         private int $depth,
         private ?string $parentUuid,
         private int $position,
+        private string $_location,
         private string $content,
         private PageStatus $status,
         private DateTimeImmutable $createdAt,
@@ -32,15 +37,17 @@ final class Page
         ?Page $parent = null,
     ): self {
         $date = new DateTimeImmutable;
-        $parentPath = $parent ? $parent->getPath() : '';
+        $parentPath = $parent ? $parent->_path : '';
+        $parentLocation = $parent ? $parent->_location : '';
         return new self(
             uuid: Uuid::uuid7()->toString(),
             title: $title,
             slug: $slug,
-            path: $parentPath . '/' . $slug,
+            _path: $parentPath . self::PATH_SEPARATOR . $slug,
             depth: $parent ? $parent->getDepth() + 1 : 0,
             parentUuid: $parent ? $parent->getUuid() : null,
             position: 0,
+            _location: $parentLocation . self::LOCATION_SEPARATOR . $title,
             content: $content,
             status: $status,
             createdAt: $createdAt ?? $date,
@@ -57,31 +64,50 @@ final class Page
         ?Page $parent = null,
     ): void
     {
-        $this->title = $title;
-        $this->content = $content;
-        $this->status = $status;
+        $parentChanged = $this->parentUuid !== $parent?->getUuid();
+        $this->parentUuid = $parent?->getUuid();
 
-        if ($this->slug !== $slug || $this->parentUuid !== $parent?->getUuid()) {
+        if ($this->slug !== $slug || $parentChanged) {
             $this->slug = $slug;
-            $this->parentUuid = $parent?->getUuid();
-
             if ($parent === null) {
                 $this->depth = 0;
-                $this->path = '/' . $slug;
+                $this->_path = self::PATH_SEPARATOR . $slug;
             } else {
                 $this->depth = $parent->getDepth() + 1;
-                $this->path = $parent->getPath() . '/' . $slug;
+                $this->_path = $parent->_path . self::PATH_SEPARATOR . $slug;
             }
         }
+
+        if ($this->title !== $title || $parentChanged) {
+            $this->title = $title;
+            if ($parent === null) {
+                $this->_location = self::LOCATION_SEPARATOR . $title;
+            } else {
+                $this->_location = $parent->_location . self::LOCATION_SEPARATOR . $title;
+            }
+        }
+
+        $this->content = $content;
+        $this->status = $status;
 
         $this->updatedAt = new DateTimeImmutable;
     }
 
     public function delete(): void
     {
-        $this->status = PageStatus::DELETED;
         $this->deletedAt = new DateTimeImmutable;
         $this->updatedAt = new DateTimeImmutable;
+    }
+
+    public function restore(): void
+    {
+        $this->deletedAt = null;
+        $this->updatedAt = new DateTimeImmutable;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->deletedAt !== null;
     }
 
     public function getUuid(): string
@@ -99,9 +125,9 @@ final class Page
         return $this->slug;
     }
 
-    public function getPath(): string
+    public function getPath(string $separator = self::DEFAULT_SEPARATOR): string
     {
-        return $this->path;
+        return str_replace(self::PATH_SEPARATOR, $separator, $this->_path);
     }
 
     public function getDepth(): int
@@ -120,6 +146,15 @@ final class Page
         $this->updatedAt = new DateTimeImmutable;
 
         return $this;
+    }
+
+    public function getParentLocation(string $separator = self::DEFAULT_SEPARATOR): string
+    {
+        $parts = explode(self::LOCATION_SEPARATOR, $this->_location);
+        array_shift($parts);
+        array_pop($parts);
+
+        return implode($separator, $parts);
     }
 
     public function getContent(): string

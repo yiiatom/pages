@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Atom\Pages\Repository;
 
+use Atom\Helper\ReadableDataProxy;
 use Atom\Pages\Data\PageDataReader;
 use Atom\Pages\Entity\Page;
 use Atom\Pages\Entity\PageStatus;
 use Atom\Pages\Mapper\PageMapper;
+use Yiisoft\Data\Db\QueryDataReader;
+use Yiisoft\Data\Reader\DataReaderInterface;
 use Yiisoft\Data\Reader\Iterable\IterableDataReader;
+use Yiisoft\Data\Reader\ReadableDataInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
 final readonly class PageRepository
@@ -18,63 +22,69 @@ final readonly class PageRepository
         private PageMapper $mapper,
     ) {}
 
-    public function save(Page $entity): void
+    public function save(Page|array $pages): void
     {
-        $old = $this->findOneByUuid($entity->getUuid());
+        $pages = is_array($pages) ? $pages : [$pages];
 
-        if ($old !== null) {
-            $this->update($entity, $old);
-        } else {
-            $this->insert($entity);
-        }
+        $this->connection->transaction(function () use ($pages): void {
+            foreach ($pages as $page) {
+                $old = $this->findOneByUuid($page->getUuid());
+
+                if ($old !== null) {
+                    $this->update($page, $old);
+                } else {
+                    $this->insert($page);
+                }
+            }
+        });
     }
 
     private function insert(Page $entity): void
     {
-        $this->connection->transaction(function () use ($entity): void {
-            $position = $this->getNextPosition($entity->getParentUuid());
-            $entity->setPosition($position);
+        $position = $this->getNextPosition($entity->getParentUuid());
+        $entity->setPosition($position);
 
-            $row = $this->mapper->mapEntityToRow($entity);
-            $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
-        });
+        $row = $this->mapper->mapEntityToRow($entity);
+        $this->connection->createCommand()->insert('{{%page}}', $row)->execute();
     }
 
     private function update(Page $entity, Page $old): void
     {
-        $this->connection->transaction(function () use ($entity, $old): void {
-            if ($entity->getParentUuid() !== $old->getParentUuid()) {
-                $position = $this->getNextPosition($entity->getParentUuid());
-                $entity->setPosition($position);
-            }
+        if ($entity->getParentUuid() !== $old->getParentUuid()) {
+            $position = $this->getNextPosition($entity->getParentUuid());
+            $entity->setPosition($position);
+        }
 
-            $row = $this->mapper->mapEntityToRow($entity);
-            $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $entity->getUuid()])->execute();
+        $oldRow = $this->mapper->mapEntityToRow($old);
+        $row = $this->mapper->mapEntityToRow($entity);
 
-            if ($entity->getStatus() === PageStatus::DELETED && $old->getStatus() !== PageStatus::DELETED) {
-                $this->connection->createCommand()
-                    ->update('{{%page}}', [
-                        'status' => PageStatus::DELETED->value,
-                        'deleted_at' => $entity->getDeletedAt(),
-                    ], 'path LIKE :path', null, [
-                        ':path' => $old->getPath() . '/%',
-                    ])->execute();
-            }
+        $this->connection->createCommand()->update('{{%page}}', $row, ['uuid' => $entity->getUuid()])->execute();
 
-            if ($entity->getPath() !== $old->getPath()) {
-                $this->connection->createCommand(
-                    'UPDATE {{%page}}
-                    SET path = REPLACE(path, :oldPath, :newPath),
-                        depth = depth + :depthDiff
-                    WHERE path LIKE :likePath',
-                )->bindValues([
-                    ':oldPath' => $old->getPath(),
-                    ':newPath' => $entity->getPath(),
-                    ':depthDiff' => $entity->getDepth() - $old->getDepth(),
-                    ':likePath' => $old->getPath() . '/%',
+        if ($entity->isDeleted() && !$old->isDeleted()) {
+            $this->connection->createCommand()
+                ->update('{{%page}}', [
+                    'deleted_at' => $row['deleted_at'],
+                ], '_path LIKE :path', null, [
+                    ':path' => $oldRow['_path'] . Page::PATH_SEPARATOR . '%',
                 ])->execute();
-            }
-        });
+        }
+
+        if ($row['_path'] !== $oldRow['_path']) {
+            $this->connection->createCommand(
+                'UPDATE {{%page}}
+                SET [[_path]] = REPLACE([[_path]], :oldPath, :newPath),
+                    [[depth]] = [[depth]] + :depthDiff,
+                    [[_location]] = REPLACE([[_location]], :oldLocation, :newLocation)
+                WHERE _path LIKE :likePath',
+            )->bindValues([
+                ':oldPath' => $oldRow['_path'] . Page::PATH_SEPARATOR,
+                ':newPath' => $row['_path'] . Page::PATH_SEPARATOR,
+                ':depthDiff' => $row['depth'] - $oldRow['depth'],
+                ':oldLocation' => $oldRow['_location'] . Page::LOCATION_SEPARATOR,
+                ':newLocation' => $row['_location'] . Page::LOCATION_SEPARATOR,
+                ':likePath' => $oldRow['_path'] . Page::PATH_SEPARATOR . '%',
+            ])->execute();
+        }
     }
 
     private function createEntity(?array $row): ?Page
@@ -108,7 +118,7 @@ final readonly class PageRepository
             ->from('{{%page}}')
             ->where(['slug' => $slug, 'parent_uuid' => $parentUuid]);
 
-        $query->andWhere(['!=', 'status', PageStatus::DELETED->value]);
+        $query->andWhere(['deleted_at' => null]);
 
         if ($excludeUuid) {
             $query->andWhere(['!=', 'uuid', $excludeUuid]);
@@ -127,11 +137,11 @@ final readonly class PageRepository
         return $this->createEntity($query->one());
     }
 
-    public function getTreeAsDataReader(array $filters = []): PageDataReader
+    public function getTreeAsDataReader(array $filters = []): ReadableDataInterface
     {
         $rows = $this->connection
             ->select()
-            ->where(['!=', 'status', PageStatus::DELETED->value])
+            ->where(['deleted_at' => null])
             ->orderBy(['position' => SORT_ASC])
             ->from('{{%page}}')->all();
 
@@ -155,8 +165,50 @@ final readonly class PageRepository
         $buildTree(null);
 
         $reader = new IterableDataReader($orderedRows);
+        $dataReader = new PageDataReader($reader, $this->mapper);
 
-        return new PageDataReader($reader, $this->mapper);
+        return new ReadableDataProxy($dataReader);
+    }
+
+    public function getDeletedAsDataReader(): DataReaderInterface
+    {
+        $query = $this->connection
+            ->select()
+            ->from('{{%page}}')
+            ->where(['not', ['deleted_at' => null]])
+            ->orderBy(['deleted_at' => SORT_DESC]);
+
+        return new PageDataReader(new QueryDataReader($query), $this->mapper);
+    }
+
+    public function findAllParents(Page $entity): array
+    {
+        $row = $this->mapper->mapEntityToRow($entity);
+
+        $parts = explode(Page::PATH_SEPARATOR, $row['_path']);
+        array_shift($parts);
+        array_pop($parts);
+
+        $paths = [];
+        $path = '';
+        foreach ($parts as $part) {
+            $path .= Page::PATH_SEPARATOR . $part;
+            $paths[] = $path;
+        }
+
+        $rows = $this->connection
+            ->select()
+            ->from('{{%page}}')
+            ->where(['_path' => $paths])
+            ->orderBy(['_path' => SORT_ASC])
+            ->all();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $items[] = $this->createEntity($row);
+        }
+
+        return $items;
     }
 
     private function getNextPosition(?string $parentUuid): int

@@ -18,10 +18,11 @@ final class M260724072257Page implements RevertibleMigrationInterface, Transacti
             'uuid' => ColumnBuilder::string(36)->notNull(),
             'title' => ColumnBuilder::string(255)->notNull(),
             'slug' => ColumnBuilder::string(255)->notNull(),
-            'path' => ColumnBuilder::string(1024)->notNull(),
+            '_path' => ColumnBuilder::string(1024)->notNull(),
             'depth' => ColumnBuilder::integer()->notNull()->defaultValue(0),
             'parent_uuid' => ColumnBuilder::string(36),
             'position' => ColumnBuilder::integer()->notNull()->defaultValue(0),
+            '_location' => ColumnBuilder::string(1024)->notNull(),
             'content' => ColumnBuilder::text()->notNull(),
             'status' => ColumnBuilder::string(32)->notNull()->defaultValue(PageStatus::DRAFT->value),
             'created_at' => ColumnBuilder::datetime()->notNull(),
@@ -41,9 +42,9 @@ final class M260724072257Page implements RevertibleMigrationInterface, Transacti
             'CASCADE',
         );
 
-        $b->execute('CREATE INDEX `path` ON ' . self::PAGE_TABLE . ' (`path`(255))');
+        $b->execute('CREATE INDEX `path` ON ' . self::PAGE_TABLE . ' (`_path`(255))');
 
-        $b->execute('CREATE INDEX `path_position` ON ' . self::PAGE_TABLE . ' (`path`(255), `position`)');
+        $b->execute('CREATE INDEX `path_position` ON ' . self::PAGE_TABLE . ' (`_path`(255), `position`)');
 
         $b->createIndex(self::PAGE_TABLE, 'parent_uuid_slug', ['parent_uuid', 'slug', 'deleted_at'], 'UNIQUE');
     }

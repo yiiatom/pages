@@ -36,5 +36,13 @@ return [
             Route::post('/pages/sort')
                 ->action(Atom\Pages\Web\Sort\Action::class)
                 ->name('atom.page.sort'),
+
+            Route::get('/pages/trash')
+                ->action(Atom\Pages\Web\Trash\Action::class)
+                ->name('atom.page.trash'),
+
+            Route::post('/pages/{uuid}/restore')
+                ->action(Atom\Pages\Web\Restore\Action::class)
+                ->name('atom.page.restore'),
         ),
 ];
