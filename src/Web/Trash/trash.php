@@ -5,9 +5,9 @@ declare(strict_types=1);
 use Atom\Pages\Entity\Page;
 use Yiisoft\Html\Html;
 use Yiisoft\Yii\DataView\GridView\Column\ActionButton;
-use Yiisoft\Yii\DataView\GridView\GridView;
 use Yiisoft\Yii\DataView\GridView\Column\ActionColumn;
 use Yiisoft\Yii\DataView\GridView\Column\DataColumn;
+use Yiisoft\Yii\DataView\GridView\GridView;
 
 $title = 'Trash';
 
