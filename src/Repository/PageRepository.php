@@ -103,6 +103,41 @@ final readonly class PageRepository
         return $this->mapper->mapRowToEntity($row);
     }
 
+    public function getSummaryStats(): array
+    {
+        $stats = [
+            'total' => 0,
+            'published' => 0,
+            'draft' => 0,
+            'trash' => 0,
+        ];
+
+        $rows = $this->connection
+            ->select(['status', 'COUNT(*) as count'])
+            ->from('{{%page}}')
+            ->where(['deleted_at' => null])
+            ->groupBy('status')
+            ->all();
+
+        foreach ($rows as $row) {
+            $count = (int) $row['count'];
+            $stats['total'] += $count;
+
+            if ($row['status'] == PageStatus::PUBLISHED->value) {
+                $stats['published'] += $count;
+            } elseif ($row['status'] == PageStatus::DRAFT->value) {
+                $stats['draft'] += $count;
+            }
+        }
+
+        $stats['trash'] = $this->connection->createQuery()
+            ->from('{{%page}}')
+            ->where(['not', ['deleted_at' => null]])
+            ->count();
+
+        return $stats;
+    }
+
     public function exists(string $uuid): bool
     {
         return $this->connection->createQuery()
