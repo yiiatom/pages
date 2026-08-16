@@ -16,6 +16,11 @@ $this->setTitle($title);
 
 $assetManager->register(PagesAsset::class);
 
+$trashLabel = Html::i()->class('fa-solid fa-trash-can me-2')->render() . 'Trash';
+if ($deletedCount > 0) {
+    $trashLabel .= Html::span($deletedCount, ['class' => 'badge bg-secondary ms-1'])->render();
+}
+
 ?>
 <h1><?= Html::encode($title) ?></h1>
 
@@ -24,7 +29,7 @@ $assetManager->register(PagesAsset::class);
         ->url($urlGenerator->generate('atom.page.create'))
         ->class('btn btn-primary me-2')
     ?>
-    <?= Html::a(Html::i()->class('fa-solid fa-trash-can me-2')->render() . 'Trash')
+    <?= Html::a($trashLabel)
         ->url($urlGenerator->generate('atom.page.trash'))
         ->class('btn btn-outline-secondary')
         ->encode(false)

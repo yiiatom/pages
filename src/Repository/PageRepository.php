@@ -130,12 +130,17 @@ final readonly class PageRepository
             }
         }
 
-        $stats['trash'] = $this->connection->createQuery()
+        $stats['trash'] = $this->getDeletedCount();
+
+        return $stats;
+    }
+
+    public function getDeletedCount(): int
+    {
+        return $this->connection->createQuery()
             ->from('{{%page}}')
             ->where(['not', ['deleted_at' => null]])
             ->count();
-
-        return $stats;
     }
 
     public function exists(string $uuid): bool

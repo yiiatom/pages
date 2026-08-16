@@ -24,11 +24,13 @@ final class Action
         $this->breadcrumbsProvider->add('Pages');
 
         $dataReader = $this->pageRepository->findTreeAsDataReader();
+        $deletedCount = $this->pageRepository->getDeletedCount();
 
         return $request
             ->getAttribute(WebViewRenderer::class)
             ->render(__DIR__ . '/index', [
                 'dataReader' => $dataReader,
+                'deletedCount' => $deletedCount,
             ]);
     }
 }
