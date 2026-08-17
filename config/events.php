@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Atom\Entity\UserRole;
-use Atom\Event\DashboardEvent;
+use Atom\Dashboard\DashboardEvent;
 use Atom\Event\SidebarMenuEvent;
 use Atom\Pages\Listener\DashboardListener;
 use Atom\Web\Shared\Sidebar\SidebarMenuItem;

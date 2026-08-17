@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Atom\Pages\Listener;
 
-use Atom\Event\DashboardEvent;
+use Atom\Dashboard\DashboardCard;
+use Atom\Dashboard\DashboardCardItem;
+use Atom\Dashboard\DashboardEvent;
 use Atom\Pages\Repository\PageRepository;
-use Atom\Web\Dashboard\DashboardCard;
-use Atom\Web\Dashboard\DashboardCardItem;
 use Yiisoft\Router\UrlGeneratorInterface;
 
 final class DashboardListener
