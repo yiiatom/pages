@@ -6,7 +6,7 @@ namespace Atom\Pages\Listener;
 
 use Atom\Dashboard\DashboardCard;
 use Atom\Dashboard\DashboardCardItem;
-use Atom\Dashboard\DashboardEvent;
+use Atom\Dashboard\Event\DashboardEvent;
 use Atom\Pages\Repository\PageRepository;
 use Yiisoft\Router\UrlGeneratorInterface;
 
