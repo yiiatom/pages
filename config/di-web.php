@@ -19,7 +19,7 @@ return [
                 ? new IntlMessageFormatter()
                 : new SimpleMessageFormatter(); // @codeCoverageIgnore
 
-            return new CategorySource('atom-users', $reader, $formatter);
+            return new CategorySource('atom-pages', $reader, $formatter);
         },
         'tags' => ['translation.categorySource'],
     ],
