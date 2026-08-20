@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Atom\Pages\Web\Index;
 
+use Atom\Breadcrumbs\Breadcrumb;
+use Atom\Breadcrumbs\BreadcrumbsProvider;
 use Atom\Pages\Repository\PageRepository;
-use Atom\Web\Shared\Breadcrumbs\BreadcrumbsProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -21,7 +22,11 @@ final class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
-        $this->breadcrumbsProvider->add('Pages');
+        $this->breadcrumbsProvider->add(
+            new Breadcrumb(
+                label: 'Pages',
+            ),
+        );
 
         $dataReader = $this->pageRepository->findTreeAsDataReader();
         $deletedCount = $this->pageRepository->getDeletedCount();

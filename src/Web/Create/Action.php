@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Atom\Pages\Web\Create;
 
+use Atom\Breadcrumbs\Breadcrumb;
+use Atom\Breadcrumbs\BreadcrumbsProvider;
 use Atom\Pages\Entity\Page;
 use Atom\Pages\Entity\PageStatus;
 use Atom\Pages\Repository\PageRepository;
-use Atom\Web\Shared\Breadcrumbs\BreadcrumbsProvider;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,9 +33,15 @@ final readonly class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
-        $this->breadcrumbsProvider
-            ->add('Pages', 'atom.page.index')
-            ->add('Create Page');
+        $this->breadcrumbsProvider->add(
+            new Breadcrumb(
+                label: 'Pages',
+                url: $this->urlGenerator->generate('atom.page.index'),
+            ),
+            new Breadcrumb(
+                label: 'Create Page',
+            ),
+        );
 
         $parents = $this->pageRepository->findTreeAsDataReader()->read();
 
