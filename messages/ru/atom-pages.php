@@ -29,6 +29,7 @@ return [
     'Slug is already in use.' => 'Этот слаг уже используется.',
     'Page has been created.' => 'Страница создана.',
     'Page has been updated.' => 'Изменения сохранены.',
+    'Page has been deleted.' => 'Страница удалена.',
 
     'Last Updated: {date}' => 'Изменено: {date}',
 ];
