@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace Atom\Pages\Web\Edit;
 
+use Atom\Helper\FormTranslatorTrait;
 use Atom\Pages\Entity\Page;
 use Atom\Pages\Entity\PageStatus;
 use Yiisoft\FormModel\FormModel;
 use Yiisoft\Validator\Label;
+use Yiisoft\Validator\LabelsProviderInterface;
 use Yiisoft\Validator\Rule\Length;
 use Yiisoft\Validator\Rule\Regex;
 use Yiisoft\Validator\Rule\Required;
 use Yiisoft\Validator\Rule\Uuid;
 
-final class PageEditForm extends FormModel
+final class PageEditForm extends FormModel implements LabelsProviderInterface
 {
+    use FormTranslatorTrait;
+
     private ?string $path = null;
 
     private iterable $parents = [];
@@ -64,7 +68,9 @@ final class PageEditForm extends FormModel
 
     public function getParentUuidOptions(): array
     {
-        $options = ['' => '— No Parent —'];
+        $t = $this->getTranslator();
+
+        $options = ['' => $t->translate('[No Parent]')];
 
         /** @var Page $page */
         foreach ($this->parents as $page) {
@@ -86,9 +92,11 @@ final class PageEditForm extends FormModel
 
     public function getStatusOptions(): array
     {
+        $t = $this->getTranslator();
+
         return [
-            PageStatus::DRAFT->value => PageStatus::DRAFT->getLabel(),
-            PageStatus::PUBLISHED->value => PageStatus::PUBLISHED->getLabel(),
+            PageStatus::DRAFT->value => $t->translate(PageStatus::DRAFT->getLabel()),
+            PageStatus::PUBLISHED->value => $t->translate(PageStatus::PUBLISHED->getLabel()),
         ];
     }
 }

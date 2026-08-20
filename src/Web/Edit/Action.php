@@ -16,6 +16,7 @@ use Yiisoft\Http\Status;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Session\Flash\FlashInterface;
+use Yiisoft\Translator\TranslatorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 final readonly class Action
@@ -26,6 +27,7 @@ final readonly class Action
         private FormHydrator $formHydrator,
         private PageRepository $pageRepository,
         private ResponseFactoryInterface $responseFactory,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
@@ -34,6 +36,8 @@ final readonly class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $page = $this->pageRepository->findOneByUuid($uuid);
 
         if (!$page) {
@@ -43,7 +47,7 @@ final readonly class Action
 
         $this->breadcrumbsProvider->add(
             new Breadcrumb(
-                label: 'Pages',
+                label: $t->translate('Pages'),
                 url: $this->urlGenerator->generate('atom.page.index'),
             ),
             new Breadcrumb(
@@ -54,6 +58,7 @@ final readonly class Action
         $parents = $this->pageRepository->findTreeAsDataReader()->read();
 
         $form = (new PageEditForm())
+            ->withTranslator($t)
             ->withPath($page->getPath())
             ->withParents($parents);
 
@@ -96,6 +101,7 @@ final readonly class Action
         return $request
             ->getAttribute(WebViewRenderer::class)
             ->render(__DIR__ . '/edit', [
+                't' => $t,
                 'form' => $form,
                 'page' => $page,
             ]);

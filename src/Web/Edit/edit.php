@@ -2,11 +2,21 @@
 
 declare(strict_types=1);
 
+use Atom\Pages\Entity\Page;
 use Atom\Pages\Web\Shared\PagesAsset;
 use Yiisoft\Html\Html;
 use Yiisoft\FormModel\Field;
+use Yiisoft\Router\UrlGeneratorInterface;
+use Yiisoft\Translator\TranslatorInterface;
 
-$title = 'Edit Page';
+/**
+ * @var PageCreateForm $form
+ * @var TranslatorInterface $t
+ * @var UrlGeneratorInterface $urlGenerator
+ * @var Page $page
+ */
+
+$title = $t->translate('Edit Page');
 
 $this->setTitle($title);
 
@@ -28,10 +38,13 @@ $htmlForm = Html::form()
     <?= Field::select($form, 'status')->optionsData($form->getStatusOptions()) ?>
     <?= Field::textarea($form, 'content') ?>
     <div id="form-content-container" class="mb-2"></div>
-    <?= Html::submitButton('Submit')->class('btn btn-primary') ?>
-    <?= Html::a('Cancel')->url($urlGenerator->generate('atom.page.index'))->class('btn btn-outline-secondary') ?>
+    <?= Html::submitButton($t->translate('Save'))->class('btn btn-primary') ?>
+    <?= Html::a($t->translate('Cancel'))
+        ->url($urlGenerator->generate('atom.page.index'))
+        ->class('btn btn-outline-secondary')
+    ?>
 <?= $htmlForm->close() ?>
 
-<div class="mt-2">
+<div class="mt-3">
     <i>Last updated: <?= $page->getUpdatedAt()->format('Y-m-d H:i:s') ?></i>
 </div>

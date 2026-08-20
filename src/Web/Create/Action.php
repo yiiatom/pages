@@ -16,6 +16,7 @@ use Yiisoft\FormModel\FormHydrator;
 use Yiisoft\Http\Status;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Session\Flash\FlashInterface;
+use Yiisoft\Translator\TranslatorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 final readonly class Action
@@ -26,6 +27,7 @@ final readonly class Action
         private FormHydrator $formHydrator,
         private PageRepository $pageRepository,
         private ResponseFactoryInterface $responseFactory,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
@@ -33,19 +35,22 @@ final readonly class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $this->breadcrumbsProvider->add(
             new Breadcrumb(
-                label: 'Pages',
+                label: $t->translate('Pages'),
                 url: $this->urlGenerator->generate('atom.page.index'),
             ),
             new Breadcrumb(
-                label: 'Create Page',
+                label: $t->translate('Create Page'),
             ),
         );
 
         $parents = $this->pageRepository->findTreeAsDataReader()->read();
 
         $form = (new PageCreateForm())
+            ->withTranslator($t)
             ->withParents($parents);
 
         $uuid = $request->getQueryParams()['uuid'] ?? null;
@@ -86,6 +91,7 @@ final readonly class Action
         return $request
             ->getAttribute(WebViewRenderer::class)
             ->render(__DIR__ . '/create', [
+                't' => $t,
                 'form' => $form,
             ]);
     }
