@@ -23,7 +23,7 @@ $this->setTitle($title);
 $assetManager->register(PagesAsset::class);
 
 $htmlForm = Html::form()
-    ->class('form-default form-page-create')
+    ->class('form-constrained')
     ->post()
     ->attribute('data-translit-url', $urlGenerator->generate('atom.translit'))
     ->csrf($csrf);
