@@ -14,6 +14,7 @@
     "extra": {
         "config-plugin": {
             "params": "config/params.php",
+            "di-web": "config/di-web.php",
             "events": "config/events.php",
             "routes": "config/routes.php"
         }
