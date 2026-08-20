@@ -10,6 +10,7 @@ use Atom\Pages\Repository\PageRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
+use Yiisoft\Translator\TranslatorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 final class Action
@@ -17,6 +18,7 @@ final class Action
     public function __construct(
         private BreadcrumbsProvider $breadcrumbsProvider,
         private PageRepository $pageRepository,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
@@ -24,13 +26,15 @@ final class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $this->breadcrumbsProvider->add(
             new Breadcrumb(
-                label: 'Pages',
+                label: $t->translate('Pages'),
                 url: $this->urlGenerator->generate('atom.page.index'),
             ),
             new Breadcrumb(
-                label: 'Trash',
+                label: $t->translate('Trash'),
             ),
         );
 
@@ -39,6 +43,7 @@ final class Action
         return $request
             ->getAttribute(WebViewRenderer::class)
             ->render(__DIR__ . '/trash', [
+                't' => $t,
                 'dataReader' => $dataReader,
             ]);
     }

@@ -12,6 +12,7 @@ use Yiisoft\Http\Status;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Session\Flash\FlashInterface;
+use Yiisoft\Translator\TranslatorInterface;
 
 final readonly class Action
 {
@@ -19,6 +20,7 @@ final readonly class Action
         private FlashInterface $flash,
         private PageRepository $pageRepository,
         private ResponseFactoryInterface $responseFactory,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
@@ -27,6 +29,8 @@ final readonly class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $page = $this->pageRepository->findOneByUuid($uuid);
 
         if (!$page || !$page->isDeleted()) {
@@ -45,7 +49,7 @@ final readonly class Action
 
         $this->pageRepository->save($items);
 
-        $this->flash->add('success', 'Page has been restored.');
+        $this->flash->add('success', $t->translate('Page has been restored.'));
 
         return $this->responseFactory
             ->createResponse(Status::SEE_OTHER)

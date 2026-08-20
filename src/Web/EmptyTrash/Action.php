@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Http\Status;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Session\Flash\FlashInterface;
+use Yiisoft\Translator\TranslatorInterface;
 
 final readonly class Action
 {
@@ -18,6 +19,7 @@ final readonly class Action
         private FlashInterface $flash,
         private PageRepository $pageRepository,
         private ResponseFactoryInterface $responseFactory,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
@@ -25,12 +27,14 @@ final readonly class Action
         ServerRequestInterface $request,
     ): ResponseInterface
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $count = $this->pageRepository->purgeDeleted();
 
         if ($count === 0) {
-            $this->flash->add('success', 'Trash is empty.');
+            $this->flash->add('success', $t->translate('Trash is empty.'));
         } else {
-            $this->flash->add('success', 'Trash has been cleared.');
+            $this->flash->add('success', $t->translate('Trash has been cleared.'));
         }
 
         return $this->responseFactory
