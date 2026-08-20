@@ -9,34 +9,47 @@ use Atom\Dashboard\DashboardCardItem;
 use Atom\Dashboard\Event\DashboardEvent;
 use Atom\Pages\Repository\PageRepository;
 use Yiisoft\Router\UrlGeneratorInterface;
+use Yiisoft\Translator\TranslatorInterface;
 
 final class DashboardListener
 {
     public function __construct(
         private PageRepository $pageRepository,
+        private TranslatorInterface $translator,
         private UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function __invoke(DashboardEvent $event): void
     {
+        $t = $this->translator->withDefaultCategory('atom-pages');
+
         $pageStats = $this->pageRepository->getSummaryStats();
 
         $card = new DashboardCard(
-            title: 'Pages',
+            title: $t->translate('Pages'),
             icon: 'fa-solid fa-file-lines',
             items: [
-                new DashboardCardItem('Total', (string) $pageStats['total']),
-                new DashboardCardItem('Published', (string) $pageStats['published']),
-                new DashboardCardItem('Drafts', (string) $pageStats['draft']),
                 new DashboardCardItem(
-                    label: 'In Trash',
+                    label: $t->translate('Total'),
+                    value: (string) $pageStats['total'],
+                ),
+                new DashboardCardItem(
+                    label: $t->translate('Published'),
+                    value: (string) $pageStats['published'],
+                ),
+                new DashboardCardItem(
+                    label: $t->translate('Drafts'),
+                    value: (string) $pageStats['draft'],
+                ),
+                new DashboardCardItem(
+                    label: $t->translate('In Trash'),
                     value: (string) $pageStats['trash'],
                     status: $pageStats['trash'] ? 'warning' : 'default',
                 ),
             ],
             order: 15,
             linkUrl: $this->urlGenerator->generate('atom.page.index'),
-            linkText: 'Manage Pages',
+            linkText: $t->translate('Manage Pages'),
         );
 
         $event->addCard($card);

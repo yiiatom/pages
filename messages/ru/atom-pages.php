@@ -41,4 +41,10 @@ return [
     'Are you sure you want to restore this page?' => 'Вы уверены, что хотите восстановить эту страницу?',
 
     'Last Updated: {date}' => 'Изменено: {date}',
+
+    'Total' => 'Всего',
+    'Published' => 'Опубликовано',
+    'Drafts' => 'Черновики',
+    'In Trash' => 'В корзине',
+    'Manage Pages' => 'Открыть список',
 ];
