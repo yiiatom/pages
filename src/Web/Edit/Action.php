@@ -72,7 +72,7 @@ final readonly class Action
 
         if ($form->isValid()) {
             if ($this->pageRepository->existsBySlug($form->slug, $form->parentUuid, $page->getUuid())) {
-                $form->addError('Slug is already in use.', ['slug']);
+                $form->addError($t->translate('Slug is already in use.'), ['slug']);
             }
         }
 
@@ -88,7 +88,7 @@ final readonly class Action
             );
             $this->pageRepository->save($page);
 
-            $this->flash->add('success', 'Page has been updated.');
+            $this->flash->add('success', $t->translate('Page has been updated.'));
 
             return $this->responseFactory
                 ->createResponse(Status::SEE_OTHER)

@@ -46,5 +46,7 @@ $htmlForm = Html::form()
 <?= $htmlForm->close() ?>
 
 <div class="mt-3">
-    <i>Last updated: <?= $page->getUpdatedAt()->format('Y-m-d H:i:s') ?></i>
+    <?= Html::i($t->translate('Last Updated: {date}', [
+        'date' => $page->getUpdatedAt()->format('Y-m-d H:i:s'),
+    ])) ?>
 </div>

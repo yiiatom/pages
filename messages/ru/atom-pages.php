@@ -26,4 +26,9 @@ return [
     'Cancel' => 'Отмена',
 
     'Are you sure you want to delete this page? All its subpages will also be deleted.' => 'Вы уверены, что хотите удалить эту страницу? Все ее подстраницы также будут удалены.',
+    'Slug is already in use.' => 'Этот слаг уже используется.',
+    'Page has been created.' => 'Страница создана.',
+    'Page has been updated.' => 'Изменения сохранены.',
+
+    'Last Updated: {date}' => 'Изменено: {date}',
 ];
