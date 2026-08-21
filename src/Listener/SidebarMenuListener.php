@@ -24,6 +24,7 @@ final class SidebarMenuListener
             routeName: 'atom.page.index',
             icon: 'fa-solid fa-file-lines',
             requiredRole: UserRole::ADMIN,
+            priority: 10,
         ));
     }
 }
